@@ -1,0 +1,20 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('tipo_banco_ventas', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 120)->unique();          // p.ej. Banco Pichincha, Coop. JEP
+            $table->enum('tipo', ['BANCO','COOPERATIVA','OTRO'])->default('BANCO');
+            $table->boolean('activo')->default(true);
+            $table->timestamps();
+        });
+    }
+    public function down(): void {
+        Schema::dropIfExists('tipo_banco_ventas');
+    }
+};

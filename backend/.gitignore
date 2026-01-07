@@ -1,0 +1,16 @@
+# Ignorar dependencias de PHP
+/vendor/
+
+# Ignorar dependencias de Node (si las hay)
+/node_modules/
+
+# Ignorar configuración local y logs
+.env
+storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*.log
+
+# Otros
+.phpunit.result.cache
