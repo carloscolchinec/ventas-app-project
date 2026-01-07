@@ -22,7 +22,7 @@ services:
     container_name: phpmyadmin_service
     restart: always
     ports:
-      - "5782:80"
+      - "5783:80" # Cambiamos el puerto externo a 5783
     environment:
       - PMA_HOST=db_soccto
     depends_on:
