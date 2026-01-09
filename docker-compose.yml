@@ -47,7 +47,7 @@ services:
       - apps-network
 
   # 4. Nginx (Servidor Web para el Backend - Puerto 5061)
-  web_backend:
+web_backend:
     image: nginx:alpine
     container_name: nginx_backend_soccto
     restart: always
@@ -55,12 +55,12 @@ services:
       - "5061:80"
     volumes:
       - ./backend:/var/www
-      - ./backend/docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      # Opción A (Si usas Git/Rutas relativas):
+      - ./backend/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app_backend
     networks:
       - apps-network
-
   # 5. Frontend (Reserva de espacio - Puerto 5060)
   # frontend_soccto:
   #   image: nginx:alpine # O la imagen que vayas a usar
