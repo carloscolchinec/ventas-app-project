@@ -1,4 +1,4 @@
-version: '3.8' # Subimos a 3.9 para soportar configs inline de forma estable
+version: '3.8' }
 
 services:
   # 1. Base de Datos MySQL (Interno 3306)
