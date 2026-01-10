@@ -50,16 +50,12 @@ services:
     networks:
       - apps-network
 
-  web_backend:
+ web_backend:
     image: nginx:alpine
     container_name: nginx_backend_soccto
-    restart: always
-    ports:
-      - "5061:80"
     volumes:
       - ./backend:/var/www
-      # OPCIÓN: Mapear el archivo de configuración desde el host
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro  # <--- Esta línea es clave
     depends_on:
       - app_backend
     networks:
