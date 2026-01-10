@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Servidor Laravel con APACHE
   app:
     build:
       context: ./backend
@@ -9,21 +8,21 @@ services:
     container_name: soccto_app
     restart: unless-stopped
     ports:
-      - "5061:80" # Mantenemos el 5061 (Cuidado con el bloqueo del navegador)
+      - "5061:80" # Mapeo al puerto 5061 solicitado
     environment:
       APP_URL: "http://soccto.seroficom.com:5061"
     volumes:
-      - ./backend:/var/www/html
+      # Sincroniza la carpeta local 'backend' con el destino en el contenedor
+      - ./backend:/var/www/html 
     networks:
       - apps-network
 
-  # Base de Datos MySQL
   mysql:
     image: 'mysql:8.0'
     container_name: soccto_db
     restart: unless-stopped
     ports:
-      - "5064:3306" # Puerto solicitado 5064
+      - "5064:3306" # Puerto solicitado 5064 para MySQL
     environment:
       MYSQL_ROOT_PASSWORD: "Soccto789!#"
       MYSQL_DATABASE: "soccto_db"
@@ -34,7 +33,6 @@ services:
     networks:
       - apps-network
 
-  # phpMyAdmin
   phpmyadmin:
     image: 'phpmyadmin/phpmyadmin'
     container_name: soccto_phpmyadmin
@@ -42,7 +40,7 @@ services:
     depends_on:
       - mysql
     ports:
-      - "5062:80"
+      - "5062:80" # Puerto solicitado 5062 para phpMyAdmin
     environment:
       PMA_HOST: soccto_db
       PMA_PORT: 3306
@@ -51,7 +49,7 @@ services:
 
 networks:
   apps-network:
-    external: true # Usa la red existente
+    external: true # Usa la red bridge 172.18.0.1 existente
 
 volumes:
   soccto_db_data:
