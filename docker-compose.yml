@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # 1. Base de Datos MySQL
   db_soccto:
     image: mysql:8.0
     container_name: mysql_db_soccto
@@ -18,7 +17,6 @@ services:
     networks:
       - apps-network
 
-  # 2. phpMyAdmin (Puerto 5062)
   phpmyadmin_soccto:
     image: phpmyadmin:latest
     container_name: phpmyadmin_soccto_service
@@ -32,7 +30,6 @@ services:
     networks:
       - apps-network
 
-  # 3. Laravel App (Backend)
   app_backend:
     build:
       context: ./backend
@@ -46,7 +43,6 @@ services:
     networks:
       - apps-network
 
-  # 4. Nginx (Puerto 5061)
   web_backend:
     image: nginx:alpine
     container_name: nginx_backend_soccto
@@ -55,11 +51,38 @@ services:
       - "5061:80"
     volumes:
       - ./backend:/var/www
-      - ./backend/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # USAMOS UN CONFIG EN LUGAR DE UN VOLUME DE ARCHIVO
+      - nginx_config:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app_backend
     networks:
       - apps-network
+
+# AQUÍ DEFINIMOS EL ARCHIVO DENTRO DEL COMPOSE
+configs:
+  nginx_config:
+    inline: |
+      server {
+          listen 80;
+          server_name soccto.seroficom.com;
+          index index.php index.html;
+          root /var/www/public;
+
+          location ~ \.php$ {
+              try_files $$uri =404;
+              fastcgi_split_path_info ^(.+\.php)(/.+)$;
+              fastcgi_pass app_backend:9000;
+              fastcgi_index index.php;
+              include fastcgi_params;
+              fastcgi_param SCRIPT_FILENAME $$document_root$$fastcgi_script_name;
+              fastcgi_param PATH_INFO $$fastcgi_path_info;
+          }
+
+          location / {
+              try_files $$uri $$uri/ /index.php?$$query_string;
+              gzip_static on;
+          }
+      }
 
 networks:
   apps-network:
