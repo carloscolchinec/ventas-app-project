@@ -1,60 +1,66 @@
 version: '3.8'
 
 services:
-  db_soccto:
-    image: mysql:8.0
-    container_name: mysql_db_soccto
-    restart: always
-    environment:
-      MYSQL_DATABASE: soccto_db
-      MYSQL_USER: soccto_admin
-      MYSQL_PASSWORD: "Soccto789!#"
-      MYSQL_ROOT_PASSWORD: "RootSoccto2024!#"
-    ports:
-      - "33060:3306"
-    volumes:
-      - db_data_soccto:/var/lib/mysql
-    networks:
-      - apps-network
-
-  app_backend:
+  # Servidor Principal (Laravel / PHP-FPM / Nginx)
+  # Se asume que tu Dockerfile construye el entorno PHP/Nginx
+  app:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
-    container_name: laravel_api_soccto
-    restart: always
+    container_name: soccto_app
+    restart: unless-stopped
+    tty: true
     environment:
-      DB_CONNECTION: mysql
-      DB_HOST: db_soccto
-      DB_PORT: 3306
-      DB_DATABASE: soccto_db
-      DB_USERNAME: soccto_admin
-      DB_PASSWORD: "Soccto789!#"
-    volumes:
-      - ./backend:/var/www
-    depends_on:
-      - db_soccto
-    networks:
-      - apps-network
-
-  web_backend:
-    image: nginx:alpine
-    container_name: nginx_backend_soccto
-    restart: always
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+      APP_URL: "http://soccto.seroficom.com:5061"
     ports:
-      - "5061:80"
+      - '5061:80' # Dominio soccto.seroficom.com
     volumes:
-      - ./backend:/var/www
-      # Ruta verificada según tu imagen de VS Code
-      - ./backend/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - app_backend
+      - '.:/var/www/html'
+      - './docker/nginx.conf:/etc/nginx/conf.d/default.conf' # Usa tu config local
     networks:
       - apps-network
 
+  # Base de Datos MySQL
+  mysql:
+    image: 'mysql:8.0'
+    container_name: soccto_db
+    restart: unless-stopped
+    ports:
+      - '3306:3306' # Puerto solicitado
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - 'soccto_db_data:/var/lib/mysql'
+    networks:
+      - apps-network
+
+  # Herramienta phpMyAdmin
+  phpmyadmin:
+    image: 'phpmyadmin/phpmyadmin'
+    container_name: soccto_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - '5062:80' # Puerto solicitado para phpMyAdmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    networks:
+      - apps-network
+
+# Definición de Redes y Volúmenes
 networks:
   apps-network:
-    external: true
+    external: true # Usa la red existente que mostraste en la imagen
 
 volumes:
-  db_data_soccto:
+  soccto_db_data:
+    driver: local
