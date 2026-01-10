@@ -9,7 +9,7 @@ services:
     container_name: soccto_app
     restart: unless-stopped
     ports:
-      - "5061:80" # Acceso externo por 5061
+      - "5061:80"
     environment:
       APP_URL: "http://soccto.seroficom.com:5061"
     volumes:
@@ -18,16 +18,15 @@ services:
     networks:
       - apps-network
 
-  # Base de Datos MySQL con tus credenciales
+  # Base de Datos MySQL
   mysql:
     image: 'mysql:8.0'
     container_name: soccto_db
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "5064:3306" # <--- Cambiado a 5064 externo
     environment:
-      # Sincronizado con tu .env
-      MYSQL_ROOT_PASSWORD: "Soccto789!#" 
+      MYSQL_ROOT_PASSWORD: "Soccto789!#"
       MYSQL_DATABASE: "soccto_db"
       MYSQL_USER: "soccto_admin"
       MYSQL_PASSWORD: "Soccto789!#"
@@ -44,16 +43,16 @@ services:
     depends_on:
       - mysql
     ports:
-      - "5062:80" # Acceso por 5062
+      - "5062:80"
     environment:
-      PMA_HOST: soccto_db # Debe apuntar al nombre del contenedor mysql
-      PMA_PORT: 3306
+      PMA_HOST: soccto_db # Conexión interna por nombre de contenedor
+      PMA_PORT: 3306      # Internamente MySQL siempre escucha en 3306
     networks:
       - apps-network
 
 networks:
   apps-network:
-    external: true # Usa la red existente 172.18.0.1
+    external: true
 
 volumes:
   soccto_db_data:
